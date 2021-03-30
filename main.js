@@ -8,6 +8,15 @@ const resultText = document.querySelector(".result-text");
 const validRepoRegex = /^\s*([-\w]+)\/([-.\w]+)\s*$/
 let working;
 
+function setErroredState(state, element) {
+  const originalClassValue = element.getAttribute("class");
+  if (state) {
+    element.setAttribute("class", originalClassValue + " error");
+  } else {
+    element.setAttribute("class", originalClassValue.replaceAll(" error", ""));
+  }
+}
+
 async function get_next_number(owner, repo) {
   let res = await octokit.request({
     method: "GET",
@@ -34,7 +43,6 @@ function checkInputValidity() {
       );
     }
     repoInput.reportValidity();
-    
     return false;
   }
   return true;
@@ -47,7 +55,7 @@ function setWorkingStatus() {
   getButton.disabled = true;
   function showWorkingDots() {
     if (working) {
-      workingStatusText.textContent = `working ${". ".repeat(workingStep)}`
+      workingStatusText.textContent = `working${" .".repeat(workingStep)}`
       if (workingStep === 3) {
         workingStep = 1;
       } else {
@@ -59,47 +67,50 @@ function setWorkingStatus() {
   showWorkingDots();
 }
 
-function setFinishedStatus(errored) {
+function setFinishedStatus(errored, details, _mayBeUnsafe = true) {
   working = false;
-  if (errored) {
-    workingStatusText.textContent = "ERROR!!!";
-    workingStatusText.setAttribute("class", workingStatusText.getAttribute("class") + " errored");
+  workingStatusText.textContent = errored ?  "ERROR!!!" : "done!";
+  setErroredState(errored, workingStatusText);
+  if (_mayBeUnsafe) {
+    resultText.textContent = details;
   } else {
-    workingStatusText.textContent = "done!";
-    workingStatusText.setAttribute("class", workingStatusText.getAttribute("class").replaceAll(" errored", ""));
+    resultText.innerHTML = details;
   }
+  setErroredState(errored, resultText);
   repoInput.readOnly = false;
   getButton.disabled = false;
+}
+
+function resetOutputStatus() {
+  workingStatusText.innerHTML = "";
+  setErroredState(false, workingStatusText);
+  resultText.innerHTML = "";
+  setErroredState(false, resultText);
 }
 
 async function onSubmit() {
   if (!checkInputValidity()){
     return;
   }
-  let owner, repo
   const match = validRepoRegex.exec(repoInput.value);
-  [owner, repo] = match.slice(1);
+  const [owner, repo] = match.slice(1);
+  resetOutputStatus();
   setWorkingStatus();
-  let failed = false;
-  let err = null;
-  let nextNumber;
+  let nextNumber, resultString;
+  let failed = false, isResultStringUnsafe = true;
   // TODO: improve error handling
   // TODO: add colouring to output text according to if there was an error
   try {
     nextNumber = await get_next_number(owner, repo);
+    resultString = `${nextNumber.toString().bold()} will be the next number assigned.`
+    isResultStringUnsafe = false;
   }
-  catch (e) {
+  catch (err) {
     failed = true;
-    err = e;
+    resultString = err.toString()
     console.table(err);
   }
-  setFinishedStatus(failed);
-  if (failed) {
-    resultText.textContent = err.toString();
-  } else {
-    resultText.innerHTML = `${nextNumber.toString().bold()} will be the next number assigned.`;
-  }
-  
+  setFinishedStatus(failed, resultString, isResultStringUnsafe);
 }
 
 repoInput.addEventListener("keydown", (event) => {
