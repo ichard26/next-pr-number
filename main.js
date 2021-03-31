@@ -27,7 +27,11 @@ async function get_next_number(owner, repo) {
     owner: owner,
     repo: repo,
   });
-  return res.data.pop().number + 1;
+  if (res.data.length === 0) {
+    return 1;
+  } else {
+    return res.data.pop().number + 1;
+  }
 }
 
 function checkInputValidity() {
@@ -39,7 +43,7 @@ function checkInputValidity() {
       );
     } else {
       repoInput.setCustomValidity(
-        "Please match the {owner}/{repo} format. e.g. github/docs"
+        "Please match the {owner}/{name} format. e.g. github/docs"
       );
     }
     repoInput.reportValidity();
@@ -93,24 +97,38 @@ async function onSubmit() {
     return;
   }
   const match = validRepoRegex.exec(repoInput.value);
-  const [owner, repo] = match.slice(1);
+  const [owner, name] = match.slice(1);
   resetOutputStatus();
   setWorkingStatus();
   let nextNumber, resultString;
-  let failed = false, isResultStringUnsafe = true;
-  // TODO: improve error handling
-  // TODO: add colouring to output text according to if there was an error
+  let failed = false, isResultStringUnsafe = true, unexpectedErr = null;
   try {
-    nextNumber = await get_next_number(owner, repo);
+    nextNumber = await get_next_number(owner, name);
     resultString = `${nextNumber.toString().bold()} will be the next number assigned.`
     isResultStringUnsafe = false;
   }
   catch (err) {
     failed = true;
-    resultString = err.toString()
-    console.table(err);
+    if (err.name === "HttpError") {
+      if (err.status === 404) {
+        isResultStringUnsafe = false;
+        resultString = "That repository doesn't exist.";
+      } else if (err.status === 403 && err.message.toLowerCase().includes("api rate limit exceeded")) {
+        isResultStringUnsafe = false;
+        resultString = "GitHub's API rate limit exceeded. Please wait and try again later."
+      } else {
+        resultString = `unexpected error: ${err.toString()}`;
+        unexpectedErr = err;
+      }
+    } else {
+      resultString = `unexpected error: ${err.toString()}`;
+      unexpectedErr = err;
+    }
   }
   setFinishedStatus(failed, resultString, isResultStringUnsafe);
+  if (unexpectedErr != null) {
+    throw unexpectedErr;
+  }
 }
 
 repoInput.addEventListener("keydown", (event) => {
