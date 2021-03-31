@@ -17,15 +17,15 @@ function setErroredState(state, element) {
   }
 }
 
-async function get_next_number(owner, repo) {
+async function get_next_number(owner, name) {
   let res = await octokit.request({
     method: "GET",
-    url: "/repos/{owner}/{repo}/issues?state=all&direction=desc&sort=created&per_page=1",
+    url: "/repos/{owner}/{name}/issues?state=all&direction=desc&sort=created&per_page=1",
     headers: {
       accept: "application/vnd.github.v3+json"
     },
     owner: owner,
-    repo: repo,
+    name: name,
   });
   if (res.data.length === 0) {
     return 1;
@@ -138,3 +138,17 @@ repoInput.addEventListener("keydown", (event) => {
   }
 });
 getButton.addEventListener("click", onSubmit);
+
+function maybeUseRepoFromURL() {
+  const params = new URLSearchParams(document.location.search.substring(1));
+  let owner = params.get("owner"), name = params.get("name");
+  if (owner === null && name === null) {
+    return;
+  }
+  owner = owner != null ? owner : "";
+  name = name != null ? name : "";
+  repoInput.value = `${owner}/${name}`;
+  onSubmit();
+}
+
+window.addEventListener("DOMContentLoaded", maybeUseRepoFromURL);
