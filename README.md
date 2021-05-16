@@ -11,9 +11,6 @@ afterhand.
 - **Sharable URLs that autofill the repository** - Want your project's contributors to
   use Next PR Number? Give them a link that autofills and queries your repository for
   them for a seamless experience.
-
-**Features** (not yet implemented but wanted)**:**
-
 - **Lightweight** - Next PR Number is built with pure HTML, JS, CSS. There's no
   dependencies that slow down page load.
 

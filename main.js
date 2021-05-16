@@ -1,6 +1,3 @@
-import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
-
-const octokit = new Octokit();
 const repoInput = document.querySelector(".repo-input");
 const getButton = document.querySelector(".get-button");
 const workingStatusText = document.querySelector(".working-status-text");
@@ -17,21 +14,40 @@ function setErroredState(state, element) {
   }
 }
 
-async function get_next_number(owner, name) {
-  let res = await octokit.request({
-    method: "GET",
-    url: "/repos/{owner}/{name}/issues?state=all&direction=desc&sort=created&per_page=1",
-    headers: {
-      accept: "application/vnd.github.v3+json"
-    },
-    owner: owner,
-    name: name,
-  });
-  if (res.data.length === 0) {
-    return 1;
-  } else {
-    return res.data.pop().number + 1;
+class HTTPError extends Error {
+  constructor(code, message) {
+    super(message);
+    this.name = "HTTPError";
+    this.statusCode = code;
   }
+}
+
+function get_next_number(owner, name) {
+  return new Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", `https://api.github.com/repos/${owner}/${name}/issues?state=all&direction=desc&sort=created&per_page=1`);
+    xhr.setRequestHeader("Accept", "application/vnd.github.v3+json");
+    xhr.onload = function () {
+      if (this.status >= 200 && this.status < 300) {
+        let result;
+        let data = JSON.parse(xhr.responseText);
+        if (data.length === 0) {
+          result = 1;
+        } else {
+          result = data.pop().number + 1;
+        }
+        resolve(result);
+      } else {
+        let message = JSON.parse(xhr.responseText).message;
+        reject(new HTTPError(xhr.status, message));
+      }
+    };
+    xhr.onerror = function () {
+      let message = JSON.parse(xhr.responseText).message;
+      reject(new HTTPError(xhr.status, message));
+    };
+    xhr.send();
+  });
 }
 
 function checkInputValidity() {
@@ -109,11 +125,11 @@ async function onSubmit() {
   }
   catch (err) {
     failed = true;
-    if (err.name === "HttpError") {
-      if (err.status === 404) {
+    if (err.name === "HTTPError") {
+      if (err.statusCode === 404) {
         isResultStringUnsafe = false;
         resultString = "That repository doesn't exist.";
-      } else if (err.status === 403 && err.message.toLowerCase().includes("api rate limit exceeded")) {
+      } else if (err.statusCode === 403 && err.message.toLowerCase().includes("api rate limit exceeded")) {
         isResultStringUnsafe = false;
         resultString = "GitHub's API rate limit exceeded. Please wait and try again later."
       } else {
