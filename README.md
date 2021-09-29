@@ -20,7 +20,7 @@ and I provide documentation assistance for [bandersnatch](https://github.com/pyp
 . Updating a changelog in preparation for a release takes time, valuable time away
 from other things. So a policy was introduced where PRs now must have an changelog
 entry which contains the PR number. While that reduced the administrative workload,
-it pretty much pushed the workload on to the contributo,w ho must now get the PR
+it pretty much pushed the workload on to the contributors, who must now get the PR
 number somehow. You can guess / fill-in the rest of the details :)
 
 **Note: Next PR Number only supports public GitHub repositories**
