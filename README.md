@@ -50,4 +50,5 @@ and you deserve the thanks!
 
 Glued together by Richard Si ([@ichard26](https://github.com/ichard26)).
 
+- Jaap Roes
 - *your name here perhaps?*
