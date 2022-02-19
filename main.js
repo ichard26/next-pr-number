@@ -1,8 +1,9 @@
+const defaultTitle = "Next PR Number";
 const repoInput = document.querySelector(".repo-input");
 const getButton = document.querySelector(".get-button");
 const workingStatusText = document.querySelector(".working-status-text");
 const resultText = document.querySelector(".result-text");
-const validRepoRegex = /^\s*([-\w]+)\/([-.\w]+)\s*$/
+const validRepoRegex = /^\s*([-\w]+)\s*\/\s*([-.\w]+)\s*$|^https:\/\/github\.com\/([-\w]+)\/([-.\w]+)(?:\/.*)?$/
 let working;
 
 function setErroredState(state, element) {
@@ -101,11 +102,31 @@ function setFinishedStatus(errored, details, _mayBeUnsafe = true) {
   getButton.disabled = false;
 }
 
+function updateQueryParamsAndTitle(owner, name) {
+  let url = new URL(window.location.href);
+  let searchParams = url.searchParams;
+  searchParams.set("owner", owner);
+  searchParams.set("name", name);
+  window.history.replaceState(null, null, url);
+  document.title = owner.concat("/", name, " | ", defaultTitle);
+}
+
+function removeQueryParamsAndTitle() {
+  let url = new URL(window.location.href);
+  let searchParams = url.searchParams;
+  for (let key of Array.from(searchParams.keys())) {
+    searchParams.delete(key)
+  }
+  window.history.replaceState(null, null, url)
+  document.title = defaultTitle;
+}
+
 function resetOutputStatus() {
   workingStatusText.innerHTML = "";
   setErroredState(false, workingStatusText);
   resultText.innerHTML = "";
   setErroredState(false, resultText);
+  removeQueryParamsAndTitle()
 }
 
 async function onSubmit() {
@@ -113,7 +134,7 @@ async function onSubmit() {
     return;
   }
   const match = validRepoRegex.exec(repoInput.value);
-  const [owner, name] = match.slice(1);
+  const [owner, name] = match[1] ? match.slice(1, 3) : match.slice(3, 5);
   resetOutputStatus();
   setWorkingStatus();
   let nextNumber, resultString;
@@ -145,6 +166,9 @@ async function onSubmit() {
   if (unexpectedErr != null) {
     throw unexpectedErr;
   }
+  if (!failed) {
+    updateQueryParamsAndTitle(owner, name);
+  }
 }
 
 repoInput.addEventListener("keydown", (event) => {
@@ -158,7 +182,7 @@ getButton.addEventListener("click", onSubmit);
 function maybeUseRepoFromURL() {
   const params = new URLSearchParams(document.location.search.substring(1));
   let owner = params.get("owner"), name = params.get("name");
-  if (owner === null && name === null) {
+  if (owner === null || name === null) {
     return;
   }
   owner = owner != null ? owner : "";
