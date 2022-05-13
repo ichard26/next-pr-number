@@ -13,13 +13,13 @@ html, body {
 }
 
 body {
-  max-width: 330px;
   display: flex;
-  flex-direction: column;
-  padding: 40px 20px 5px 20px;
-  background-color: var(--background-color);
-  margin: 0 auto 0 auto;
   box-sizing: border-box;
+  max-width: 330px;
+  padding: 40px 20px 5px 20px;
+  margin: 0 auto 0 auto;
+  flex-direction: column;
+  background-color: var(--background-color);
 }
 
 a {
@@ -54,7 +54,7 @@ h2 {
 }
 
 .repo-input:read-only, .get-button:disabled {
-  transition: filter 1500ms, border-color 1500ms, color 1500ms;
+  transition: filter 300ms, border-color 300ms, color 300ms;
   filter: grayscale(80%);
   border-color: var(--disabled-accent-color);
 }
@@ -95,7 +95,7 @@ footer {
   font-size: 0.85rem;
 }
 
-footer > p {
+footer p {
   margin: 3px;
 }
 

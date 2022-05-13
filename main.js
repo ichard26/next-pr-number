@@ -6,63 +6,55 @@ const resultText = document.querySelector(".result-text");
 const validRepoRegex = /^\s*([-\w]+)\s*\/\s*([-.\w]+)\s*$|^https:\/\/github\.com\/([-\w]+)\/([-.\w]+)(?:\/.*)?$/
 let working;
 
-function setErroredState(state, element) {
-  const originalClassValue = element.getAttribute("class");
-  if (state) {
-    element.setAttribute("class", originalClassValue + " error");
-  } else {
-    element.setAttribute("class", originalClassValue.replaceAll(" error", ""));
-  }
+function sanitizeString(string) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    "/": '&#x2F;',
+  };
+  const reg = /[&<>"'/]/ig;
+  return string.replace(reg, (match) => (map[match]));
 }
 
 class HTTPError extends Error {
   constructor(code, message) {
     super(message);
     this.name = "HTTPError";
-    this.statusCode = code;
+    this.status = code;
   }
 }
 
-function get_next_number(owner, name) {
-  return new Promise(function (resolve, reject) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", `https://api.github.com/repos/${owner}/${name}/issues?state=all&direction=desc&sort=created&per_page=1`);
-    xhr.setRequestHeader("Accept", "application/vnd.github.v3+json");
-    xhr.onload = function () {
-      if (this.status >= 200 && this.status < 300) {
-        let result;
-        let data = JSON.parse(xhr.responseText);
-        if (data.length === 0) {
-          result = 1;
-        } else {
-          result = data.pop().number + 1;
-        }
-        resolve(result);
-      } else {
-        let message = JSON.parse(xhr.responseText).message;
-        reject(new HTTPError(xhr.status, message));
-      }
-    };
-    xhr.onerror = function () {
-      let message = JSON.parse(xhr.responseText).message;
-      reject(new HTTPError(xhr.status, message));
-    };
-    xhr.send();
+async function getNextNumber(owner, name) {
+  const url = `https://api.github.com/repos/${owner}/${name}/issues?state=all&direction=desc&sort=created&per_page=1`;
+  const response = await fetch(url, {
+    headers: { "Accept": "application/vnd.github.v3+json" }
   });
+  const data = await response.json();
+  console.log(`Remaining API quota: ${response.headers.get("x-ratelimit-remaining")}`);
+  if (!response.ok) {
+    console.error("HTTPError", response);
+    throw new HTTPError(response.status, data.message);
+  }
+
+  if (data.length === 0) {
+    return 1
+  } else {
+    return data.pop().number + 1;
+  }
 }
 
 function checkInputValidity() {
-  const inputValue = repoInput.value;
-  if (!validRepoRegex.test(inputValue)) {
+  if (!validRepoRegex.test(repoInput.value)) {
+    let msg;
     if (!repoInput.value.length) {
-      repoInput.setCustomValidity(
-        "Please enter a repo. e.g. github/docs"
-      );
+      msg = "Please enter a repo. e.g. github/docs";
     } else {
-      repoInput.setCustomValidity(
-        "Please match the {owner}/{name} format. e.g. github/docs"
-      );
+      msg = "Please match the {owner}/{name} format. e.g. github/docs"
     }
+    repoInput.setCustomValidity(msg);
     repoInput.reportValidity();
     return false;
   }
@@ -88,23 +80,21 @@ function setWorkingStatus() {
   showWorkingDots();
 }
 
-function setFinishedStatus(errored, details, _mayBeUnsafe = true) {
+function setFinishedStatus(errored, details) {
   working = false;
-  workingStatusText.textContent = errored ?  "ERROR!!!" : "done!";
-  setErroredState(errored, workingStatusText);
-  if (_mayBeUnsafe) {
-    resultText.textContent = details;
-  } else {
-    resultText.innerHTML = details;
+  workingStatusText.textContent = errored ? "ERROR!!!" : "done!";
+  if (errored) {
+    workingStatusText.classList.add("error");
+    resultText.classList.add("error");
   }
-  setErroredState(errored, resultText);
+  resultText.innerHTML = details;
   repoInput.readOnly = false;
   getButton.disabled = false;
 }
 
 function updateQueryParamsAndTitle(owner, name) {
-  let url = new URL(window.location.href);
-  let searchParams = url.searchParams;
+  const url = new URL(window.location.href);
+  const searchParams = url.searchParams;
   searchParams.set("owner", owner);
   searchParams.set("name", name);
   window.history.replaceState(null, null, url);
@@ -112,8 +102,8 @@ function updateQueryParamsAndTitle(owner, name) {
 }
 
 function removeQueryParamsAndTitle() {
-  let url = new URL(window.location.href);
-  let searchParams = url.searchParams;
+  const url = new URL(window.location.href);
+  const searchParams = url.searchParams;
   for (let key of Array.from(searchParams.keys())) {
     searchParams.delete(key)
   }
@@ -123,51 +113,40 @@ function removeQueryParamsAndTitle() {
 
 function resetOutputStatus() {
   workingStatusText.innerHTML = "";
-  setErroredState(false, workingStatusText);
+  workingStatusText.classList.remove("error");
   resultText.innerHTML = "";
-  setErroredState(false, resultText);
-  removeQueryParamsAndTitle()
+  resultText.classList.remove("error");
+  removeQueryParamsAndTitle();
 }
 
 async function onSubmit() {
-  if (!checkInputValidity()){
+  if (!checkInputValidity()) {
     return;
   }
   const match = validRepoRegex.exec(repoInput.value);
   const [owner, name] = match[1] ? match.slice(1, 3) : match.slice(3, 5);
   resetOutputStatus();
   setWorkingStatus();
-  let nextNumber, resultString;
-  let failed = false, isResultStringUnsafe = true, unexpectedErr = null;
+  let resultString;
   try {
-    nextNumber = await get_next_number(owner, name);
+    const nextNumber = await getNextNumber(owner, name);
     resultString = `${nextNumber.toString().bold()} will be the next number assigned.`
-    isResultStringUnsafe = false;
+    setFinishedStatus(false, resultString);
+    updateQueryParamsAndTitle(owner, name);
   }
   catch (err) {
-    failed = true;
     if (err.name === "HTTPError") {
-      if (err.statusCode === 404) {
-        isResultStringUnsafe = false;
+      if (err.status === 404) {
         resultString = "That repository doesn't exist.";
-      } else if (err.statusCode === 403 && err.message.toLowerCase().includes("api rate limit exceeded")) {
-        isResultStringUnsafe = false;
+      } else if (err.status === 403 && err.message.toLowerCase().includes("api rate limit exceeded")) {
         resultString = "GitHub's API rate limit exceeded. Please wait and try again later."
       } else {
-        resultString = `unexpected error: ${err.toString()}`;
-        unexpectedErr = err;
+        resultString = `unexpected error: ${sanitizeString(err.toString())}`;
       }
     } else {
-      resultString = `unexpected error: ${err.toString()}`;
-      unexpectedErr = err;
+      resultString = `unexpected error: ${sanitizeString(err.toString())}`;
     }
-  }
-  setFinishedStatus(failed, resultString, isResultStringUnsafe);
-  if (unexpectedErr != null) {
-    throw unexpectedErr;
-  }
-  if (!failed) {
-    updateQueryParamsAndTitle(owner, name);
+    setFinishedStatus(true, resultString);
   }
 }
 
@@ -188,7 +167,7 @@ function maybeUseRepoFromURL() {
   owner = owner != null ? owner : "";
   name = name != null ? name : "";
   repoInput.value = `${owner}/${name}`;
-  onSubmit();
+  getButton.click();
 }
 
 window.addEventListener("DOMContentLoaded", maybeUseRepoFromURL);
