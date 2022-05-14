@@ -26,7 +26,7 @@ a {
   color: var(--primary-accent-color);
 }
 
-h1, h2, .repo-input, .get-button, .output-text-div, footer {
+h1, h2, .repo-input, .get-button, .output-text-container, footer {
   padding: 10px 15px;
   margin: auto;
   box-sizing: border-box;
@@ -80,7 +80,12 @@ h2 {
   background-color: var(--primary-light-accent-color);
 }
 
-.output-text-div p {
+/* For browsers that don't recognize <output> */
+.output-text-container {
+  display: block;
+}
+
+.output-text-container p {
   margin-top: 0;
 }
 
