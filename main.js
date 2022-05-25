@@ -164,8 +164,8 @@ function maybeUseRepoFromURL() {
   if (owner === null || name === null) {
     return;
   }
-  owner = owner != null ? owner : "";
-  name = name != null ? name : "";
+  repoInput.blur();
+  document.querySelector("#tip-admonition").remove();
   repoInput.value = `${owner}/${name}`;
   getButton.click();
 }
