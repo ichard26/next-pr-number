@@ -119,7 +119,7 @@ function resetOutputStatus() {
   removeQueryParamsAndTitle();
 }
 
-async function onSubmit() {
+async function onSubmit(e) {
   if (!checkInputValidity()) {
     return;
   }
@@ -133,6 +133,11 @@ async function onSubmit() {
     resultString = `${nextNumber.toString().bold()} will be the next number assigned.`
     setFinishedStatus(false, resultString);
     updateQueryParamsAndTitle(owner, name);
+    if (!navigator.doNotTrack) {
+      const payload = {name: "Next-PR-Number-QUERY", value: `${owner}/${name}`};
+      console.log("Sending microanalytics.io event payload ...", payload);
+      window.pa.track(payload);
+    }
   }
   catch (err) {
     if (err.name === "HTTPError") {
