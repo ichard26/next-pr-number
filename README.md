@@ -42,16 +42,6 @@ this code in `index.html`:
 <script data-host="https://microanalytics.io" data-dnt="true" src="https://microanalytics.io/js/script.js" id="ZwSg9rf6GA" async="" defer=""></script>
 ```
 
-... and this code in `main.js`:
-
-```js
-    if (!navigator.doNotTrack) {
-      const payload = {name: "Next-PR-Number-QUERY", value: `${owner}/${name}`};
-      console.log("Sending microanalytics.io event payload ...", payload);
-      window.pa.track(payload);
-    }
-```
-
 Also, don't forget to change copyright and branding :)
 
 ## Contributing
