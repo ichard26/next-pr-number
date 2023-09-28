@@ -6,8 +6,6 @@ afterhand.
 
 **Features:**
 
-- **Client-side only** - There's is no backend service powering Next PR Number. Hosting
-  only requires a static web server.
 - **Sharable URLs that autofill the repository** - Want your project's contributors to
   use Next PR Number? Give them a link that autofills and queries your repository for
   them for a seamless experience. [Here's an example.][example]
@@ -64,6 +62,35 @@ too.
 
 Finally, don't forget to add yourself to the AUTHORS list below. You made a contribution
 and you deserve the thanks!
+
+### SQLite3 Schema
+
+```sql
+CREATE TABLE "queries" (
+    "datetime"   TEXT PRIMARY KEY NOT NULL,
+    "owner"      TEXT NOT NULL,
+    "name"       TEXT NOT NULL,
+    "result"     INTEGER NOT NULL
+);
+
+CREATE TABLE "requests" (
+    "datetime"   TEXT PRIMARY KEY NOT NULL,
+    "ip"         TEXT,
+    "useragent"  TEXT,
+    "verb"       TEXT NOT NULL,
+    "path"       TEXT NOT NULL,
+    "status"     INTEGER NOT NULL,
+    "duration"   REAL NOT NULL
+);
+
+CREATE TABLE "ratelimits" (
+    "key"       TEXT NOT NULL,
+    "duration"  INTEGER NOT NULL,
+    "value"     INTEGER NOT NULL,
+    "expiry"    TEXT NOT NULL,
+    PRIMARY KEY("key", "expiry")
+);
+```
 
 ## Authors
 

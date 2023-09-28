@@ -6,6 +6,8 @@ const resultText = document.querySelector(".result-text");
 const validRepoRegex = /^\s*([-\w]+)\s*\/\s*([-.\w]+)\s*$|^https:\/\/github\.com\/([-\w]+)\/([-.\w]+)(?:\/.*)?$/
 let working;
 
+const API_ENDPOINT = "https://internal.floralily.dev/next-pr-number-api";
+
 function sanitizeString(string) {
   const map = {
     '&': '&amp;',
@@ -28,22 +30,13 @@ class HTTPError extends Error {
 }
 
 async function getNextNumber(owner, name) {
-  const url = `https://api.github.com/repos/${owner}/${name}/issues?state=all&direction=desc&sort=created&per_page=1`;
-  const response = await fetch(url, {
-    headers: { "Accept": "application/vnd.github.v3+json" }
-  });
+  const response = await fetch(`${API_ENDPOINT}/?owner=${owner}&name=${name}`);
   const data = await response.json();
-  console.log(`Remaining API quota: ${response.headers.get("x-ratelimit-remaining")}`);
   if (!response.ok) {
     console.error("HTTPError", response);
-    throw new HTTPError(response.status, data.message);
+    throw new HTTPError(response.status, data.detail);
   }
-
-  if (data.length === 0) {
-    return 1
-  } else {
-    return data.pop().number + 1;
-  }
+  return data;
 }
 
 function checkInputValidity() {
@@ -139,7 +132,7 @@ async function onSubmit() {
       if (err.status === 404) {
         resultString = "That repository doesn't exist.";
       } else if (err.status === 403 && err.message.toLowerCase().includes("api rate limit exceeded")) {
-        resultString = "GitHub's API rate limit exceeded. Please wait and try again later."
+        resultString = "API rate limit exceeded. Please wait and try again later."
       } else {
         resultString = `unexpected error: ${sanitizeString(err.toString())}`;
       }
