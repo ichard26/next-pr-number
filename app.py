@@ -13,6 +13,8 @@ from lib import RateLimiter, SQLiteConnection, utc_now
 
 THIS_DIR = Path(__file__).parent
 GRAPHQL_API = "https://api.github.com/graphql"
+# This query was originally written by Jakub Kuczys (GitHub: @Jackenmen) who graciously
+# gave me permission to use his work freely here.
 GRAPHQL_QUERY = """
 query getLastIssueNumber {
   repository(owner: "$owner", name: "$name") {
@@ -74,6 +76,8 @@ async def get_next_number(owner: str, name: str) -> int:
     if repository_data is None:
         raise HTTPException(404, "repository not found")
 
+    # These four lines were originally written by Jakub Kuczys (GitHub: @Jackenmen) who
+    # graciously gave me permission to use his work freely here.
     current_number = max(
         next(iter(data["nodes"]), {"number": 0})["number"]
         for data in repository_data.values()
