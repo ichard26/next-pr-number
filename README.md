@@ -72,24 +72,6 @@ CREATE TABLE "queries" (
     "name"       TEXT NOT NULL,
     "result"     INTEGER NOT NULL
 );
-
-CREATE TABLE "requests" (
-    "datetime"   TEXT PRIMARY KEY NOT NULL,
-    "ip"         TEXT,
-    "useragent"  TEXT,
-    "verb"       TEXT NOT NULL,
-    "path"       TEXT NOT NULL,
-    "status"     INTEGER NOT NULL,
-    "duration"   REAL NOT NULL
-);
-
-CREATE TABLE "ratelimits" (
-    "key"       TEXT NOT NULL,
-    "duration"  INTEGER NOT NULL,
-    "value"     INTEGER NOT NULL,
-    "expiry"    TEXT NOT NULL,
-    PRIMARY KEY("key", "expiry")
-);
 ```
 
 ## Authors
