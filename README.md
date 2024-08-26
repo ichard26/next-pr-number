@@ -10,37 +10,25 @@ afterhand.
   use Next PR Number? Give them a link that autofills and queries your repository for
   them for a seamless experience. [Here's an example.][example]
 - **Lightweight** - Next PR Number is built with pure HTML, JS, CSS. There's no
-  dependencies that slow down page load (except for analytics provided by [microanalytics.io])
+  dependencies that slow down page load (except for analytics provided by a self-hosted
+  Plausible instance)
 
 In all seriousness, this exists to make changelog entry enforcement easier
-and a smoother experience for everyone. I help maintain [Black] and [bandersnatch].
-Writing a changelog in preparation for a release takes time, time that could be better
-spent on other things. So a policy was introduced where (substantial) PRs must have an
-changelog entry containing the PR number. While that reduced the administrative workload,
+and a smoother experience for everyone. When I maintained [black] and [bandersnatch],
+writing a release changelog takes time, time that could've been better spent elsewhere.
+So a policy was introduced where (substantial) PRs must have an
+changelog entry... and the PR number. While that reduced the administrative workload,
 it merely pushed the workload onto the contributors, who must now get the PR number
 somehow.
 
-You can guess / fill-in the rest of the details :)
+This website was created to give contributors a fast and painless way to get that PR
+number so they can focus on writing good code.
 
 **Note: Next PR Number only supports public GitHub repositories**
 
 ## Privacy statement
 
 Next PR Number to subject to the [privacy statement on my personal website][privacy].
-
-## Self-hosting / forking
-
-> Next PR Number is licensed under [MIT](./LICENSE.txt).
-
-The source contains analytics code that interact with [microanalytics.io]. If you do host
-your own version of Next PR Number or otherwise fork it, you will probably want to remove
-this code in `index.html`:
-
-```html
-<script data-host="https://microanalytics.io" data-dnt="true" src="https://microanalytics.io/js/script.js" id="ZwSg9rf6GA" async="" defer=""></script>
-```
-
-Also, don't forget to change copyright and branding :)
 
 ## Contributing
 
@@ -84,6 +72,5 @@ Glued together by Richard Si ([@ichard26](https://github.com/ichard26)).
 
 [bandersnatch]: https://github.com/pypa/bandersnatch
 [black]: https://github.com/psf/black
-[example]: https://ichard26.github.io/next-pr-number/?owner=psf&name=black
-[microanalytics.io]: https://microanalytics.io/
+[example]: https://ichard26.github.io/next-pr-number/?owner=ichard26&name=next-pr-number
 [privacy]: https://ichard26.github.io/privacy/
