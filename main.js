@@ -36,6 +36,7 @@ async function getNextNumber(owner, name) {
     console.error("HTTPError", response);
     throw new HTTPError(response.status, data.detail);
   }
+  plausible("Next PR Number: Fetch", {props: {repository: `${owner}/${name}`}});
   return data;
 }
 
