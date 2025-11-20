@@ -1,4 +1,0 @@
-fastapi >= 0.98.0
-uvicorn[standard]
-florapi @ https://github.com/ichard26/florapi/archive/main.zip
-httpx
