@@ -26,6 +26,7 @@
         --primary-light-accent-color: #69c4c7;
         --disabled-accent-color: darkslategray;
         --error-color: #c70101;
+        --success-color: #28a745;
         --admonition-icon: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEzIDloLTJWN2gybTAgMTBoLTJ2LTZoMm0tMS05QTEwIDEwIDAgMCAwIDIgMTJhMTAgMTAgMCAwIDAgMTAgMTAgMTAgMTAgMCAwIDAgMTAtMTBBMTAgMTAgMCAwIDAgMTIgMnoiLz48L3N2Zz4K");
       }
 
@@ -38,7 +39,7 @@
       body {
         display: flex;
         box-sizing: border-box;
-        max-width: 330px;
+        max-width: 400px;
         padding: 40px 20px 5px 20px;
         margin: 0 auto 0 auto;
         flex-direction: column;
@@ -98,7 +99,7 @@
         margin: 0.7rem;
       }
 
-      h1, h2, .repo-input, .get-button, .output-text-container, footer {
+      h1, h2, .username-input, .get-button, .output-text-container, footer {
         padding: 10px 15px;
         margin: auto;
         box-sizing: border-box;
@@ -114,23 +115,23 @@
         padding: 15px 0;
       }
 
-      .repo-input, .get-button {
+      .username-input, .get-button {
         width: 100%;
         border: 2px solid var(--primary-accent-color);
         font-size: 1rem;
       }
 
-      .repo-input {
+      .username-input {
         border-bottom-width: 1px;
       }
 
-      .repo-input:read-only, .get-button:disabled {
+      .username-input:read-only, .get-button:disabled {
         transition: filter 300ms, border-color 300ms, color 300ms;
         filter: grayscale(80%);
         border-color: var(--disabled-accent-color);
       }
 
-      .repo-input:read-only {
+      .username-input:read-only {
         color: var(--disabled-accent-color);
         border-bottom: none;
       }
@@ -144,6 +145,7 @@
       .get-button:hover:enabled {
         transition: background-color 250ms;
         background-color: var(--primary-dark-accent-color);
+        cursor: pointer;
       }
 
       .get-button:active {
@@ -156,8 +158,62 @@
       }
 
       .result-text {
-        font-size: 1.4rem;
+        font-size: 0.95rem;
         color: var(--primary-accent-color);
+        word-break: break-all;
+      }
+
+      .author-info {
+        font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
+        background-color: #e8e8e8;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+        font-size: 0.85rem;
+        text-align: left;
+      }
+
+      .author-info-line {
+        margin: 4px 0;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 2px;
+        transition: background-color 200ms;
+      }
+
+      .author-info-line:hover {
+        background-color: #d8d8d8;
+      }
+
+      .copy-button {
+        background-color: var(--primary-accent-color);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        margin-top: 5px;
+        transition: background-color 250ms;
+      }
+
+      .copy-button:hover {
+        background-color: var(--primary-dark-accent-color);
+      }
+
+      .copy-button:active {
+        background-color: var(--primary-light-accent-color);
+      }
+
+      .copy-button.copied {
+        background-color: var(--success-color);
+      }
+
+      .noreply-note {
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 5px;
+        font-style: italic;
       }
 
       footer {
