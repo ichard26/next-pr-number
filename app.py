@@ -65,6 +65,14 @@ http = httpx.AsyncClient()
 @app.get("/")
 async def get_next_number(owner: str, name: str) -> int:
     db = open_sqlite_connection()
+    if not db.existing_table("queries"):
+        db.create_table("queries", {
+            "datetime":   "TEXT PRIMARY KEY NOT NULL",
+            "owner":      "TEXT NOT NULL",
+            "name":       "TEXT NOT NULL",
+            "result":     "INTEGER NOT NULL",
+        })
+
     limiter = RateLimiter("api", {RateLimiter.HOUR: 25, RateLimiter.DAY: 100}, db)
     if limiter.update_and_check("query"):
         raise HTTPException(429, "API rate limit exceeded")
