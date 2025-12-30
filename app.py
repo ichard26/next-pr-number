@@ -5,6 +5,7 @@ from pathlib import Path
 import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from florapi import utc_now
 from florapi.configuration import Options
 from florapi.middleware import ProxyHeadersMiddleware, TimedLogMiddleware
@@ -55,7 +56,7 @@ app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://ichard26.github.io"],
-    allow_methods=["GET"],
+    allow_methods=["GET", "HEAD"],
 )
 app.add_middleware(ProxyHeadersMiddleware)
 app.add_middleware(TimedLogMiddleware, sqlite_factory=open_sqlite_connection)
@@ -99,3 +100,8 @@ async def get_next_number(owner: str, name: str) -> int:
     })
     db.commit()
     return current_number + 1
+
+
+@app.head("/")
+def read_root_head():
+    return Response()
