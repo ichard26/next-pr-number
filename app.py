@@ -55,7 +55,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ichard26.github.io"],
+    allow_origins=["https://ichard26.github.io", "https://sichard.ca"],
     allow_methods=["GET", "HEAD"],
 )
 app.add_middleware(ProxyHeadersMiddleware)
