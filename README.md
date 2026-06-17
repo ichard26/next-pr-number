@@ -72,5 +72,5 @@ Glued together by Richard Si ([@ichard26](https://github.com/ichard26)).
 
 [bandersnatch]: https://github.com/pypa/bandersnatch
 [black]: https://github.com/psf/black
-[example]: https://ichard26.github.io/next-pr-number/?owner=ichard26&name=next-pr-number
-[privacy]: https://ichard26.github.io/privacy/
+[example]: https://sichard.ca/next-pr-number/?owner=ichard26&name=next-pr-number
+[privacy]: https://sichard.ca/privacy/
