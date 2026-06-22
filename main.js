@@ -6,7 +6,7 @@ const resultText = document.querySelector(".result-text");
 const validRepoRegex = /^\s*([-\w]+)\s*\/\s*([-.\w]+)\s*$|^https:\/\/github\.com\/([-\w]+)\/([-.\w]+)(?:\/.*)?$/
 let working;
 
-const API_ENDPOINT = "https://internal.floralily.dev/next-pr-number-api";
+const API_ENDPOINT = "https://internal.sichard.ca/next-pr-number-api";
 
 function sanitizeString(string) {
   const map = {
